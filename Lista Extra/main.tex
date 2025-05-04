@@ -1,0 +1,218 @@
+\documentclass[sigconf]{acmart}
+
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{etoolbox}
+
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    captionpos=b,
+    numbers=left,
+    numberstyle=\tiny,
+    stepnumber=1,
+    numbersep=5pt,
+    frame=single,
+    tabsize=4,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    language=Python,
+    float=H,
+    abovecaptionskip=5pt,
+    belowcaptionskip=5pt,
+    keywordstyle=\color{blue},
+    stringstyle=\color{red},
+    commentstyle=\color{gray}
+}
+
+\title{Resolução do 8-Puzzle com Métodos de Busca: BFS, DFS e A*}
+
+\author{Luan Barbosa Rosa Carrieiros}
+\affiliation{
+  \institution{PUC Minas}
+  \city{Belo Horizonte}
+  \state{MG}
+  \country{Brasil}
+}
+\email{luan.rosa@sga.pucminas.br}
+
+\begin{document}
+
+\begin{abstract}
+Este artigo apresenta a implementação do jogo 8-Puzzle utilizando três métodos de busca: busca em largura (BFS), busca em profundidade (DFS) e o algoritmo A* com duas heurísticas diferentes. A interface gráfica em Tkinter foi adicionada para visualização interativa. O objetivo é comparar o desempenho entre os algoritmos quanto à eficiência, tempo de execução, profundidade da solução e número de nós visitados.
+\end{abstract}
+
+\keywords{Inteligência Artificial, 8-puzzle, Busca em Largura, Busca em Profundidade, A*, Heurísticas, Tkinter}
+
+\maketitle
+
+\section{Introdução}
+
+O 8-Puzzle é um clássico problema de busca em Inteligência Artificial. Neste trabalho, implementamos três algoritmos de solução (BFS, DFS e A*) e adicionamos uma interface em Tkinter para visualização e controle interativos.
+
+\section{Métodos de Busca e Funções Auxiliares}
+
+\subsection{Geração de Vizinhos}
+\begin{figure}[H]
+\centering
+\begin{lstlisting}[caption={Função get\_neighbors}]
+def get_neighbors(state):
+    neighbors = []
+    index = state.index(0)
+    row, col = divmod(index, 3)
+    moves = [
+        ("Cima", index-3, row>0),
+        ("Baixo", index+3, row<2),
+        ("Esquerda", index-1, col>0),
+        ("Direita", index+1, col<2)
+    ]
+    for direction,new_idx,valid in moves:
+        if valid:
+            new_state = list(state)
+            new_state[index], new_state[new_idx] = new_state[new_idx], new_state[index]
+            neighbors.append((new_state,direction))
+    return neighbors
+\end{lstlisting}
+\end{figure}
+
+\subsection{Heurísticas}
+\begin{figure}[H]
+\centering
+\begin{lstlisting}[caption={Heurística Manhattan}]
+def manhattan(state):
+    dist = 0
+    for i,val in enumerate(state):
+        if val==0: continue
+        goal_r,goal_c = divmod(val-1,3)
+        r,c = divmod(i,3)
+        dist += abs(goal_r-r)+abs(goal_c-c)
+    return dist
+\end{lstlisting}
+\begin{lstlisting}[caption={Heurística Peças Fora do Lugar}]
+def heuristic_misplaced(state):
+    goal = list(range(1,9))+[0]
+    return sum(1 for i,val in enumerate(state)
+               if val!=0 and val!=goal[i])
+\end{lstlisting}
+\end{figure}
+
+\subsection{Busca em Largura (BFS)}
+\begin{figure}[H]
+\centering
+\begin{lstlisting}[caption={Implementação BFS}]
+def bfs(start):
+    goal=list(range(1,9))+[0]
+    queue=deque([(start,[])])
+    visited=set()
+    while queue:
+        state,path=queue.popleft()
+        if state==goal:
+            return path
+        visited.add(tuple(state))
+        for nbr,dir in get_neighbors(state):
+            if tuple(nbr) not in visited:
+                queue.append((nbr,path+[dir]))
+    return []
+\end{lstlisting}
+\end{figure}
+
+\subsection{Busca em Profundidade Limitada (DFS)}
+\begin{figure}[H]
+\centering
+\begin{lstlisting}[caption={Implementação DFS com limite}] 
+def dfs_limited(start,limit=30):
+    goal=list(range(1,9))+[0]; visited=set()
+    def rec(s,p,d):
+        if s==goal: return p
+        if d>=limit: return None
+        visited.add(tuple(s))
+        for nbr,dir in get_neighbors(s):
+            t=tuple(nbr)
+            if t not in visited:
+                res=rec(nbr,p+[dir],d+1)
+                if res is not None: return res
+        return None
+    return rec(start,[],0) or []
+def dfs(start): return dfs_limited(start)
+\end{lstlisting}
+\end{figure}
+
+\subsection{Busca A*}
+\begin{figure}[H]
+\centering
+\begin{lstlisting}[caption={Implementação A* (Manhattan)}]
+def astar_manhattan(start):
+    goal=list(range(1,9))+[0]
+    heap=[(manhattan(start),0,start,[])]
+    visited=set()
+    while heap:
+        _,g,s,path=heapq.heappop(heap)
+        if s==goal: return path
+        visited.add(tuple(s))
+        for nbr,dir in get_neighbors(s):
+            if tuple(nbr) not in visited:
+                heapq.heappush(heap,(g+1+manhattan(nbr),g+1,nbr,path+[dir]))
+    return []
+\end{lstlisting}
+\begin{lstlisting}[caption={Implementação A* (Peças Fora)}]
+def astar_misplaced(start):
+    goal=list(range(1,9))+[0]
+    heap=[(heuristic_misplaced(start),0,start,[])]
+    visited=set()
+    while heap:
+        _,g,s,path=heapq.heappop(heap)
+        if s==goal: return path
+        visited.add(tuple(s))
+        for nbr,dir in get_neighbors(s):
+            if tuple(nbr) not in visited:
+                heapq.heappush(heap,(g+1+heuristic_misplaced(nbr),g+1,nbr,path+[dir]))
+    return []
+\end{lstlisting}
+\end{figure}
+
+\section{Interface Gráfica (Tkinter)}
+\begin{figure}[H]
+\centering
+\begin{lstlisting}[caption={Código da interface}] 
+# (ver arquivo puzzle.py)
+if __name__=='__main__':
+    root=tk.Tk()
+    app=PuzzleApp(root)
+    root.mainloop()
+\end{lstlisting}
+\caption*{Interface completa disponível em \texttt{puzzle.py}.}
+\end{figure}
+
+\section{Comparativo de Desempenho}
+\begin{table}[H]
+\centering
+\caption{Desempenho dos Algoritmos}
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{|l|c|c|c|l|}
+\hline
+Método & Tempo (s) & Nós Visitados & Movimentos & Heurística \\
+\hline
+BFS & 0.38 & 60 914 & 21 & — \\
+DFS limitado & — & — & — & — \\
+A* (Manhattan) & 0.0012 & 133 & 21 & Manhattan \\
+A* (Peças Fora) & 0.1062 & 4 822 & 21 & Fora do lugar \\
+\hline
+\end{tabular}
+}
+\end{table}
+
+\section{Conclusão}
+
+A análise comparativa demonstrou que o algoritmo A* com heurística de Manhattan apresentou o melhor desempenho geral, com menor tempo e menor número de nós visitados. A heurística de peças fora do lugar também teve desempenho satisfatório. A BFS, embora completa, foi significativamente mais lenta. A DFS não conseguiu encontrar solução no limite de profundidade adotado. Conclui-se que heurísticas eficazes tornam o A* a melhor abordagem para resolver o 8-Puzzle.
+
+\section{Código desenvolvido}
+\textbf{Link para o código e executável:} \url{https://github.com/LuanCarrieiros/IA/tree/main/Lista%20Extra}
+
+\end{document}

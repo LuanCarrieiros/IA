@@ -44,7 +44,8 @@ class EightPuzzle:
     def is_solved(self):
         return self.state == self.goal
 
-# --------- Algoritmos ---------
+# --------- Funções de Busca ---------
+
 def get_neighbors(state):
     neighbors = []
     index = state.index(0)
@@ -62,6 +63,7 @@ def get_neighbors(state):
             neighbors.append((new_state, direction))
     return neighbors
 
+
 def manhattan(state):
     dist = 0
     for i, val in enumerate(state):
@@ -71,6 +73,12 @@ def manhattan(state):
         row, col = divmod(i, 3)
         dist += abs(goal_row - row) + abs(goal_col - col)
     return dist
+
+
+def heuristic_misplaced(state):
+    goal = list(range(1,9)) + [0]
+    return sum(1 for i, val in enumerate(state) if val != 0 and val != goal[i])
+
 
 def bfs(start):
     goal = list(range(1, 9)) + [0]
@@ -86,21 +94,33 @@ def bfs(start):
                 queue.append((neighbor, path + [direction]))
     return []
 
-def dfs(start):
+
+def dfs_limited(start, limit=30):
     goal = list(range(1, 9)) + [0]
-    stack = [(start, [])]
     visited = set()
-    while stack:
-        state, path = stack.pop()
+    def recurse(state, path, depth):
         if state == goal:
             return path
+        if depth >= limit:
+            return None
         visited.add(tuple(state))
         for neighbor, direction in get_neighbors(state):
-            if tuple(neighbor) not in visited:
-                stack.append((neighbor, path + [direction]))
-    return []
+            t = tuple(neighbor)
+            if t not in visited:
+                res = recurse(neighbor, path + [direction], depth+1)
+                if res is not None:
+                    return res
+        return None
+    result = recurse(start, [], 0)
+    return result if result is not None else []
 
-def astar(start):
+
+def dfs(start):
+    # Chama DFS limitado para evitar loops infinitos
+    return dfs_limited(start, limit=30)
+
+
+def astar_manhattan(start):
     goal = list(range(1, 9)) + [0]
     queue = [(manhattan(start), 0, start, [])]
     visited = set()
@@ -112,6 +132,21 @@ def astar(start):
         for neighbor, direction in get_neighbors(state):
             if tuple(neighbor) not in visited:
                 heapq.heappush(queue, (cost + 1 + manhattan(neighbor), cost + 1, neighbor, path + [direction]))
+    return []
+
+
+def astar_misplaced(start):
+    goal = list(range(1, 9)) + [0]
+    queue = [(heuristic_misplaced(start), 0, start, [])]
+    visited = set()
+    while queue:
+        _, cost, state, path = heapq.heappop(queue)
+        if state == goal:
+            return path
+        visited.add(tuple(state))
+        for neighbor, direction in get_neighbors(state):
+            if tuple(neighbor) not in visited:
+                heapq.heappush(queue, (cost + 1 + heuristic_misplaced(neighbor), cost + 1, neighbor, path + [direction]))
     return []
 
 # --------- Interface ---------
@@ -135,37 +170,47 @@ class PuzzleApp:
 
         self.arrow_frame = tk.Frame(root, bg="#f6f6fa")
         self.arrow_frame.pack(pady=4)
-        self.seta("↑", lambda: self.move("Cima"), 1, 0)
-        self.seta("←", lambda: self.move("Esquerda"), 2, 0)
-        self.seta("↓", lambda: self.move("Baixo"), 2, 1)
-        self.seta("→", lambda: self.move("Direita"), 2, 2)
+        # Teclado direcional 3x3 para setas
+        for r in range(3):
+            for c in range(3):
+                if r == 0 and c == 1:
+                    text, cmd = "↑", lambda: self.move("Cima")
+                elif r == 1 and c == 0:
+                    text, cmd = "←", lambda: self.move("Esquerda")
+                elif r == 2 and c == 1:
+                    text, cmd = "↓", lambda: self.move("Baixo")
+                elif r == 1 and c == 2:
+                    text, cmd = "→", lambda: self.move("Direita")
+                else:
+                    text, cmd = "", None
+                tk.Button(self.arrow_frame, text=text, command=cmd,
+                          font=("Segoe UI", 12), width=5,
+                          bg="#f0d9ff", fg="#2b2d42", activebackground="#e4c1f9")\
+                    .grid(row=r, column=c, padx=4, pady=2)
 
         self.buttons_frame = tk.Frame(root, bg="#f6f6fa")
         self.buttons_frame.pack(pady=10)
 
+        # Botões de ação
         self.make_btn("Embaralhar", self.shuffle, 0)
         self.make_btn("Resolver BFS", self.solve_bfs, 1)
         self.make_btn("Resolver DFS", self.solve_dfs, 2)
-        self.make_btn("Resolver A*", self.solve_astar, 3)
+        self.make_btn("A* Manhattan", self.solve_astar_manhattan, 3)
+        self.make_btn("A* Peças Fora", self.solve_astar_misplaced, 4)
 
         self.update_ui()
-
-    def seta(self, texto, comando, linha, coluna):
-        tk.Button(self.arrow_frame, text=texto, command=comando,
-                  font=("Segoe UI", 12), width=5,
-                  bg="#f0d9ff", fg="#2b2d42", activebackground="#e4c1f9")\
-            .grid(row=linha, column=coluna, padx=4)
 
     def make_btn(self, text, command, col):
         tk.Button(self.buttons_frame, text=text, command=command,
                   font=("Segoe UI", 11), width=14,
                   bg="#b8c0ff", fg="#2b2d42", activebackground="#cdb4db")\
-            .grid(row=0, column=col, padx=8)
+            .grid(row=0, column=col, padx=6)
 
     def update_ui(self):
         for i in range(9):
             val = self.game.state[i]
-            self.tiles[i].config(text=str(val) if val != 0 else "", bg="#f6f6fa" if val == 0 else "#dcd6f7")
+            self.tiles[i].config(text=str(val) if val != 0 else "", 
+                                 bg="#f6f6fa" if val == 0 else "#dcd6f7")
 
     def click_tile(self, index):
         zero = self.game.state.index(0)
@@ -189,32 +234,39 @@ class PuzzleApp:
         total = len(moves)
 
         def step():
+            nonlocal total
             if moves:
                 self.game.move(moves.pop(0))
                 self.update_ui()
                 self.root.after(350, step)
             else:
-                messagebox.showinfo("Concluído", f"Solução encontrada com {total} movimentos.\nTempo: {tempo:.4f}s")
+                messagebox.showinfo("Concluído", f"Solução em {total} movimentos.\nTempo: {tempo:.4f}s")
 
         step()
 
     def solve_bfs(self):
-        start = time.time()
+        inicio = time.time()
         moves = bfs(self.game.state[:])
-        end = time.time()
-        self.animate(moves[:], end - start)
+        fim = time.time()
+        self.animate(moves, fim - inicio)
 
     def solve_dfs(self):
-        start = time.time()
+        inicio = time.time()
         moves = dfs(self.game.state[:])
-        end = time.time()
-        self.animate(moves[:], end - start)
+        fim = time.time()
+        self.animate(moves, fim - inicio)
 
-    def solve_astar(self):
-        start = time.time()
-        moves = astar(self.game.state[:])
-        end = time.time()
-        self.animate(moves[:], end - start)
+    def solve_astar_manhattan(self):
+        inicio = time.time()
+        moves = astar_manhattan(self.game.state[:])
+        fim = time.time()
+        self.animate(moves, fim - inicio)
+
+    def solve_astar_misplaced(self):
+        inicio = time.time()
+        moves = astar_misplaced(self.game.state[:])
+        fim = time.time()
+        self.animate(moves, fim - inicio)
 
 if __name__ == '__main__':
     root = tk.Tk()
