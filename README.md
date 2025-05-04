@@ -23,10 +23,3 @@ Este repositório contém todas as listas de exercícios e projetos desenvolvido
 - Para a lista 08 e lista-extra, opcionalmente `tkinter` para interface gráfica.
 
 > **Dica:** Cada pasta possui um ambiente virtual opcional (`venv/`) e um arquivo `requirements.txt` quando há dependências externas.
-
-## 🚀 Como Executar
-
-1. Clone este repositório:  
-   ```bash
-   git clone https://github.com/seu-usuario/seu-repositorio-ia.git
-   cd seu-repositorio-ia
