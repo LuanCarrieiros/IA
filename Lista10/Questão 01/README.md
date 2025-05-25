@@ -111,4 +111,4 @@ Fundamentalmente, confirmou-se a limitação do Perceptron em não conseguir res
 ## 6. Código Desenvolvido
 
 O código implementado está disponível no seguinte Jupyter Notebook:
-[Perceptron_manual.ipynb](https://github.com/LuanCarrieiros/IA/blob/main/Lista10/Questão%2001/Perceptron_manual.ipynb)
+[Perceptron_manual.ipynb](https://github.com/LuanCarrieiros/IA/blob/main/Lista10/Questão%2001/perceptron_manual.ipynb)
