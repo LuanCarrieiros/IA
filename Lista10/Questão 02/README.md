@@ -41,10 +41,10 @@ A Rede Neural Artificial implementada é uma **MLP (Multi-Layer Perceptron)** co
 **a) Feedforward (Propagação Direta):**
 
 Para cada amostra de entrada $X$:
-1.  Entrada da camada oculta: $Z_1 = X \cdot W_1 (+ b_1)$
-2.  Saída da camada oculta: $A_1 = \text{ativacao\_oculta}(Z_1)$
-3.  Entrada da camada de saída: $Z_2 = A_1 \cdot W_2 (+ b_2)$
-4.  Saída final (predição): $\hat{y} = A_2 = \text{ativacao\_saida}(Z_2)$
+1.  Entrada da camada oculta: $Z1 = X \cdot W_1 (+ b1)$
+2.  Saída da camada oculta: $A1 = \text{ativacao\_oculta}(Z1)$
+3.  Entrada da camada de saída: $Z2 = A1 \cdot W_2 (+ b2)$
+4.  Saída final (predição): $\hat{y} = A2 = \text{ativacao\_saida}(Z2)$
 
 **b) Função de Custo (Erro):**
 
@@ -56,8 +56,8 @@ onde $m$ é o número de amostras, $y_i$ é o valor real e $\hat{y}_i$ é a pred
 
 O algoritmo calcula os gradientes da função de custo em relação a cada peso e bias, propagando o erro da camada de saída para as camadas anteriores.
 1.  **Erro na Camada de Saída ($\delta_2$)**:
-    Se a ativação da saída é Sigmoide e o custo é Entropia Cruzada, então $\delta_2 = (\hat{y} - y)$.
-    De forma geral: $\delta_2 = (\hat{y} - y) \cdot \text{derivada\_ativacao\_saida}(Z_2)$.
+    Se a ativação da saída é Sigmoide e o custo é Entropia Cruzada, então $\delta2 = (\hat{y} - y)$.
+    De forma geral: $\delta2 = (\hat{y} - y) \cdot \text{derivada\_ativacao\_saida}(Z2)$.
 2.  **Gradientes para Pesos da Camada de Saída ($W_2$)**:
     $\Delta W_2 = \frac{1}{m} A_1^T \cdot \delta_2$.
     *(O gradiente do bias está incluído se $A_1$ contiver a entrada de bias).*
