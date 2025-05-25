@@ -49,7 +49,7 @@ Para cada amostra de entrada $X$:
 **b) Função de Custo (Erro):**
 
 Utilizamos a **Entropia Cruzada Binária** para problemas de classificação binária:
-$$J(W,b) = - \frac{1}{m} \sum_{i=1}^{m} [y_i \log(\hat{y}_i) + (1-y_i) \log(1-\hat{y}_i)]$$
+$$J(W,b)=−m1​i=1∑m​[yi​log(y^​i​)+(1−yi​)log(1−y^​i​)]$$
 onde $m$ é o número de amostras, $y_i$ é o valor real e $\hat{y}_i$ é a predição.
 
 **c) Backpropagation (Retropropagação do Erro):**
