@@ -134,7 +134,7 @@ Nesta seção, são detalhados os resultados e as análises dos experimentos rea
 * **Objetivo**: Demonstrar a capacidade da rede MLP com Backpropagation de aprender as funções AND, OR e XOR para diferentes números de entradas.
 * **Resultados**:
     A rede MLP implementada conseguiu aprender as funções lógicas AND e OR com alta acurácia (tipicamente 100%) para diferentes números de entradas testados (2, 3 e 4). A função XOR também foi aprendida com sucesso pela MLP para 2 e 3 entradas (XOR com 3 entradas como paridade), atingindo 100% de acurácia, embora geralmente exigindo mais épocas ou ajustes na arquitetura.
-* **Tabela de Resultados (Valores Ilustrativos - Substitua pelos seus dados reais)**:
+* **Tabela de Resultados**:
 
 | Função | N Entradas | N Oculta | Tx. Apr. | Ativ. Oculta | Bias | Épocas | Acurácia (%) | Custo Final |
 | :----- | :----------- | :--------- | :--------- | :------------- | :----- | :------- | :------------- | :------------ |
