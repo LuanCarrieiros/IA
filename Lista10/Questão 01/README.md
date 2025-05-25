@@ -78,11 +78,11 @@ Foram realizados testes com o Perceptron implementado manualmente para as funç�
 
 * **Para as funções AND e OR:**
     O Perceptron demonstrou ser capaz de aprender estas funções, que são linearmente separáveis. A convergência foi observada em todos os casos testados, resultando em 100% de acurácia. Para `n=2` entradas, a animação do hiperplano ilustrou claramente a formação da linha de separação. Para `n=3` entradas, a plotagem do plano de separação 3D ao final do treinamento confirmou a separação linear. Para `n=4` entradas, a visualização dos dados projetados em 2D via PCA auxiliou na compreensão da estrutura dos dados. As curvas de erro para AND e OR mostraram uma rápida queda no número de erros, atingindo zero em poucas épocas.
-    *(O gráfico pode ser conferido depois no código, link para ele no final do readme)*
+    *(Os gráficos e resultados detalhados podem ser conferidos no notebook `Perceptron_manual.ipynb`.)*
 
 * **Para a função XOR:**
     O Perceptron não conseguiu aprender a função XOR para `n=2` entradas. A acurácia final ficou em torno de 50% a 75%, e a curva de erro indicou que o modelo não convergiu para uma solução sem erros.
-    *(O gráfico pode ser conferido depois no código, link para ele no final do readme)*
+    *(Os gráficos e resultados detalhados podem ser conferidos no notebook `Perceptron_manual.ipynb`.)*
 
 **Tabela de Resultados (Valores Obtidos ao Executar `Perceptron_manual.ipynb`):**
 
@@ -96,7 +96,7 @@ Foram realizados testes com o Perceptron implementado manualmente para as funç�
 | OR     | 4            | 100%           | ~12                    | *Ex: [-0.5, 1.0, 1.0, 1.0, 1.0]* | Convergiu. Plot PCA 2D mostra os dados.                     |
 | XOR    | 2            | 75%            | Não Convergiu / 50 Ép  | *Ex: [0.1, -0.2, 0.3]* | Não linearmente separável. Animação e curva de erro mostram falha. |
 
-*(Lembre-se de substituir os valores em "Épocas p/ Convergência", "Pesos Finais" e "Acurácia (%) para XOR" pelos seus resultados reais. As acurácias de 100% para AND/OR devem ser mantidas se o código estiver correto.)*
+*(Os valores na tabela são ilustrativos e devem ser substituídos pelos resultados reais obtidos na execução do notebook.)*
 
 ---
 
