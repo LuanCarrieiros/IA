@@ -168,4 +168,4 @@ Encapsula toda a lógica da rede neural:
 ## 5. Código Desenvolvido
 
 O código implementado para a Questão 02 está disponível no seguinte Jupyter Notebook:
-`Backpropagation_manual.ipynb` *(https://github.com/LuanCarrieiros/IA/blob/main/Lista10/Questao%2002/Backpropagation_manual.ipynb).*
+`Backpropagation_manual.ipynb` *(https://github.com/LuanCarrieiros/IA/blob/main/Lista10/Questão%2002/Backpropagation_manual.ipynb).*
