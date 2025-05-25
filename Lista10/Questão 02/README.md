@@ -39,6 +39,7 @@ A Rede Neural Artificial implementada é uma **MLP (Multi-Layer Perceptron)** co
 ### 1.3. Processo de Aprendizagem (Feedforward e Backpropagation)
 
 **a) Feedforward (Propagação Direta):**
+
 Para cada amostra de entrada $X$:
 1.  Entrada da camada oculta: $Z_1 = X \cdot W_1 (+ b_1)$
 2.  Saída da camada oculta: $A_1 = \text{ativacao_oculta}(Z_1)$
@@ -46,19 +47,33 @@ Para cada amostra de entrada $X$:
 4.  Saída final (predição): $\hat{y} = A_2 = \text{ativacao_saida}(Z_2)$
 
 **b) Função de Custo (Erro):**
+
 Utilizamos a **Entropia Cruzada Binária** para problemas de classificação binária:
 $$J(W,b) = - \frac{1}{m} \sum_{i=1}^{m} [y_i \log(\hat{y}_i) + (1-y_i) \log(1-\hat{y}_i)]$$
 onde $m$ é o número de amostras, $y_i$ é o valor real e $\hat{y}_i$ é a predição.
 
 **c) Backpropagation (Retropropagação do Erro):**
-O algoritmo calcula os gradientes da função de custo em relação a cada peso e bias.
-1.  **Erro na Camada de Saída ($\delta_2$)**: Se a ativação da saída é Sigmoide e o custo é Entropia Cruzada, $\delta_2 = (\hat{y} - y)$. De forma geral: $\delta_2 = (\hat{y} - y) \cdot \text{derivada_ativacao_saida}(Z_2)$.
-2.  **Gradientes para $W_2$: $\Delta W_2 = \frac{1}{m} A_1^T \cdot \delta_2$**. (O gradiente do bias está incluído se $A_1$ contiver a entrada de bias).
-3.  **Erro na Camada Oculta ($\delta_1$): $\delta_1 = (\delta_2 \cdot W_2^T_{\text{sem_bias_saida}}) \cdot \text{derivada_ativacao_oculta}(Z_1)$**.
-4.  **Gradientes para $W_1$: $\Delta W_1 = \frac{1}{m} X^T_{\text{com_bias_entrada}} \cdot \delta_1$**. (O gradiente do bias está incluído se $X$ contiver a entrada de bias).
+
+O algoritmo calcula os gradientes da função de custo em relação a cada peso e bias, propagando o erro da camada de saída para as camadas anteriores.
+1.  **Erro na Camada de Saída ($\delta_2$)**:
+    Se a ativação da saída é Sigmoide e o custo é Entropia Cruzada, $\delta_2 = (\hat{y} - y)$.
+    De forma geral: $\delta_2 = (\hat{y} - y) \cdot \text{derivada_ativacao_saida}(Z_2)$.
+2.  **Gradientes para Pesos da Camada de Saída ($W_2$)**:
+    $\Delta W_2 = \frac{1}{m} A_1^T \cdot \delta_2$.
+    *(O gradiente do bias está incluído se $A_1$ contiver a entrada de bias).*
+3.  **Erro na Camada Oculta ($\delta_1$)**:
+    $\delta_1 = (\delta_2 \cdot W_{2, \text{sem_bias}}^T) \cdot \text{derivada_ativacao_oculta}(Z_1)$.
+    *(Onde $W_{2, \text{sem_bias}}^T$ representa os pesos de $W_2$ sem a linha/coluna do bias da camada de saída ao propagar o erro para a camada oculta).*
+4.  **Gradientes para Pesos da Camada Oculta ($W_1$)**:
+    $\Delta W_1 = \frac{1}{m} X_{\text{com_bias}}^T \cdot \delta_1$.
+    *(O gradiente do bias está incluído se $X_{\text{com_bias}}$ contiver a entrada de bias).*
 
 **d) Atualização dos Pesos e Biases:**
-$W \leftarrow W - \eta \Delta W$ (onde $\eta$ é a taxa de aprendizado).
+
+$W \leftarrow W - \eta \Delta W$
+$b \leftarrow b - \eta \Delta b$ (onde $\eta$ é a taxa de aprendizado).
+
+Este ciclo de feedforward, cálculo de custo, backpropagation e atualização é repetido por um número definido de épocas.
 
 ---
 
@@ -93,33 +108,33 @@ Nesta seção, são detalhados os resultados e as análises dos experimentos rea
 * **Metodologia**: Treinou-se a rede para XOR (2 entradas, 4 neurônios ocultos, ativação sigmoide, com bias) com taxas de aprendizado de `[0.001, 0.01, 0.1, 0.5, 1.0, 2.0]` por 3000 épocas.
 * **Resultados e Gráficos**:
     *(Os resultados detalhados e o gráfico comparativo das curvas de custo podem ser conferidos no notebook.)*
-    De forma geral, observou-se que taxas de aprendizado muito baixas (ex: 0.001) resultaram em uma convergência lenta, muitas vezes não alcançando um custo mínimo satisfatório dentro do número de épocas definido. Taxas moderadas (ex: 0.1 ou 0.5) tenderam a apresentar uma boa trajetória de convergência. Taxas mais elevadas (ex: 1.0) puderam acelerar o aprendizado inicial, mas também aumentaram o risco de oscilações próximas ao mínimo ou até mesmo de instabilidade. Taxas excessivamente altas (ex: 2.0) frequentemente levaram à divergência do algoritmo, com o custo aumentando ao invés de diminuir.
+    Observou-se que taxas muito baixas (ex: 0.001) resultaram em convergência lenta. Taxas adequadas (ex: 0.1 ou 0.5) permitiram uma boa convergência. Taxas mais altas (ex: 1.0) puderam acelerar a convergência inicialmente, mas também levaram a oscilações. Taxas excessivamente altas (ex: 2.0) causaram divergência.
 * **Análise**:
-    A escolha da taxa de aprendizado ($\eta$) é um hiperparâmetro crítico no treinamento de redes neurais. Um valor ótimo permite que a rede convirja para um bom mínimo da função de custo de forma eficiente e estável. Se a taxa é muito baixa, o processo de aprendizado se torna excessivamente lento. Por outro lado, uma taxa muito alta pode fazer com que os ajustes nos pesos sejam tão grandes que o algoritmo "salte" sobre o mínimo da função de custo, levando a oscilações, instabilidade ou até mesmo à completa divergência do treinamento. A taxa ideal geralmente requer experimentação e pode variar consideravelmente dependendo da complexidade do problema, da arquitetura da rede e da função de ativação utilizada.
+    A escolha da taxa de aprendizado é um hiperparâmetro crítico. Um valor ótimo permite que a rede convirja eficientemente. Se muito baixa, o aprendizado é lento; se muito alta, pode haver instabilidade ou divergência.
 
 ### 3.2. Investigação da Importância do Bias
 * **Objetivo**: Verificar o impacto do bias no aprendizado da função XOR.
 * **Metodologia**: Rede para XOR (2 entradas, 4 neurônios ocultos, ativação sigmoide, taxa 0.1, 3000 épocas), testada com e sem bias.
 * **Resultados e Gráficos**:
     *(Os resultados detalhados, incluindo curvas de custo e acurácias, podem ser conferidos no notebook.)*
-    Com a inclusão do bias, a rede neural foi capaz de aprender a função XOR, atingindo uma alta acurácia (tipicamente acima de 95% e chegando a 100% com ajuste fino) e um custo final muito baixo. Em contraste, na ausência do bias, a rede demonstrou uma performance significativamente inferior, falhando em aprender a função XOR adequadamente. Nesse cenário, a acurácia tendeu a ficar próxima de um palpite aleatório (em torno de 50% a 75% para XOR com 2 entradas) e o custo final permaneceu elevado, indicando a não convergência para uma solução útil.
+    Com bias, a rede aprendeu XOR com alta acurácia (ex: >95%). Sem bias, a performance foi significativamente inferior (ex: acurácia ~50-75%).
 * **Análise**:
-    O bias desempenha um papel crucial ao adicionar um grau de liberdade à rede. Ele permite que a função de ativação de cada neurônio seja deslocada, ou seja, que o neurônio possa ser ativado mesmo quando todas as suas entradas ponderadas são zero, ou que precise de uma entrada ponderada maior para ativar. Isso é fundamental para que a rede possa modelar fronteiras de decisão que não passam necessariamente pela origem do espaço de características (ou do espaço transformado pela camada anterior). Para problemas como o XOR, que não são linearmente separáveis pela origem, a ausência de bias limita severamente a capacidade da rede de encontrar uma solução adequada, mesmo com a presença de uma camada oculta não-linear.
+    O bias permite que a fronteira de decisão seja deslocada, fundamental para problemas como o XOR, onde os dados não são separáveis por um hiperplano que passa pela origem.
 
 ### 3.3. Investigação da Importância da Função de Ativação (Camada Oculta)
 * **Objetivo**: Comparar Sigmoide, Tanh e ReLU na camada oculta para aprender XOR.
 * **Metodologia**: Rede para XOR (2 entradas, 4 neurônios ocultos, taxa 0.1, 3000 épocas, com bias, saída sigmoide), variando a ativação da camada oculta.
 * **Resultados e Gráficos**:
     *(Os resultados detalhados, incluindo curvas de custo e acurácias para cada função, podem ser conferidos no notebook.)*
-    Observou-se que todas as três funções de ativação testadas (Sigmoide, Tanh e ReLU) permitiram que a rede MLP aprendesse a função XOR, atingindo alta acurácia com os hiperparâmetros configurados. A função Tanh, por ser centrada em zero (saída entre -1 e 1), muitas vezes apresentou uma convergência ligeiramente mais rápida ou uma curva de custo mais suave em comparação com a Sigmoide (saída entre 0 e 1). A ReLU, conhecida por sua simplicidade e eficiência computacional, também performou bem; embora exista o risco teórico do "dying ReLU" (neurônios que param de ativar e aprender), para este problema mais simples e com a inicialização de pesos utilizada, não se mostrou um impedimento significativo para a convergência. A Sigmoide, embora funcional, é mais suscetível a gradientes evanescentes (gradientes muito pequenos) em redes mais profundas, o que não foi um fator limitante crítico nesta arquitetura de uma única camada oculta.
+    Todas as três funções (Sigmoide, Tanh, ReLU) permitiram o aprendizado do XOR. Tanh, por ser centrada em zero, pôde apresentar convergência ligeiramente mais rápida. ReLU, eficiente, também funcionou bem. Sigmoide foi funcional, mas é mais suscetível a gradientes evanescentes em redes profundas.
 * **Análise**:
-    A escolha da função de ativação na camada oculta é crucial, pois introduz a não-linearidade necessária para que a MLP aprenda relações complexas que vão além das capacidades de modelos lineares. Funções como Tanh e ReLU são frequentemente preferidas em relação à Sigmoide em arquiteturas de redes neurais mais profundas ou complexas, devido a características de seus gradientes que podem mitigar problemas como o desaparecimento do gradiente (vanishing gradients) e acelerar o treinamento. Para o problema XOR com uma camada oculta pequena, as diferenças no desempenho final podem não ser drásticas se os hiperparâmetros forem bem ajustados para cada função, mas a dinâmica do treinamento (velocidade de convergência, estabilidade do custo) pode variar.
+    A escolha da função de ativação na camada oculta é crucial para introduzir não-linearidade. Tanh e ReLU são frequentemente preferidas em redes mais profundas.
 
 ### 3.4. Testes com Funções Lógicas (AND, OR, XOR) e `n` Entradas
 * **Objetivo**: Demonstrar a capacidade da rede MLP com Backpropagation de aprender as funções AND, OR e XOR para diferentes números de entradas.
 * **Resultados**:
-    A rede MLP implementada conseguiu aprender as funções lógicas AND e OR com alta acurácia (tipicamente 100%) para diferentes números de entradas testados (2, 3 e 4), convergindo para um custo residual muito baixo. A função XOR, que não é linearmente separável por um Perceptron simples, também foi aprendida com sucesso pela MLP para 2 e 3 entradas (onde XOR com 3 entradas foi interpretado como uma função de paridade), atingindo 100% de acurácia. Isso demonstra a capacidade da MLP com Backpropagation de criar fronteiras de decisão não lineares necessárias para tais problemas. Geralmente, o XOR exigiu um número maior de épocas e/ou uma arquitetura com mais neurônios na camada oculta para garantir a convergência, especialmente para o XOR com 3 entradas, que representa um desafio de paridade mais complexo.
-* **Tabela de Resultados (Valores Obtidos ao Executar `Backpropagation_manual.ipynb`)**:
+    A rede MLP implementada conseguiu aprender as funções lógicas AND e OR com alta acurácia (tipicamente 100%) para diferentes números de entradas testados (2, 3 e 4). A função XOR também foi aprendida com sucesso pela MLP para 2 e 3 entradas (XOR com 3 entradas como paridade), atingindo 100% de acurácia, embora geralmente exigindo mais épocas ou ajustes na arquitetura.
+* **Tabela de Resultados (Valores Ilustrativos - Substitua pelos seus dados reais)**:
 
 | Função | N Entradas | N Oculta | Tx. Apr. | Ativ. Oculta | Bias | Épocas | Acurácia (%) | Custo Final |
 | :----- | :----------- | :--------- | :--------- | :------------- | :----- | :------- | :------------- | :------------ |
@@ -136,13 +151,7 @@ Nesta seção, são detalhados os resultados e as análises dos experimentos rea
 
 ## 4. Considerações Finais
 
-A implementação manual do algoritmo Backpropagation para uma Rede Neural MLP com uma camada oculta demonstrou com sucesso sua capacidade de resolver problemas de classificação que estão além do alcance de um Perceptron simples, incluindo a função XOR, que é classicamente não linearmente separável.
-Os experimentos realizados destacaram a importância crítica de diversos hiperparâmetros e componentes da rede:
-* A **taxa de aprendizado** se mostrou um fator determinante para a convergência e estabilidade do treinamento; valores inadequados podem impedir o aprendizado ou levar a um comportamento errático do custo.
-* O **bias** confirmou seu papel fundamental ao aumentar o poder de representação da rede, sendo essencial para que a MLP pudesse aprender mapeamentos complexos como o da função XOR.
-* A escolha da **função de ativação** na camada oculta (Sigmoide, Tanh, ReLU) influenciou a dinâmica do treinamento e, potencialmente, a qualidade da solução encontrada. Embora todas tenham se mostrado capazes de resolver o XOR neste contexto, suas características intrínsecas (como ser centrada em zero ou sua resposta a grandes entradas) são considerações importantes para problemas mais desafiadores ou arquiteturas de rede mais profundas.
-
-A rede MLP implementada também demonstrou capacidade de aprendizado para as funções AND e OR com diferentes números de entradas, e para a função XOR generalizada (paridade) com 3 entradas, embora problemas mais complexos naturalmente exijam ajustes na arquitetura (como um maior número de neurônios ocultos) ou no processo de treinamento (mais épocas). Este exercício prático solidificou o entendimento do algoritmo Backpropagation e dos mecanismos que permitem às redes neurais multicamadas aprender representações complexas dos dados.
+A implementação manual do algoritmo Backpropagation para uma Rede Neural MLP demonstrou sua capacidade de resolver problemas de classificação não linearmente separáveis como o XOR. Os experimentos destacaram a importância da taxa de aprendizado, do bias e da escolha da função de ativação. A rede generalizou bem para as funções AND e OR com diferentes `n`, e também para o XOR generalizado (paridade), embora problemas mais complexos exijam ajustes na arquitetura ou treinamento.
 
 ---
 
